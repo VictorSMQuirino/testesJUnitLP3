@@ -1,10 +1,8 @@
 package application;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.InputMismatchException;
 
 public class Cadastro {
 	String nome, cpf, rg, endereco;
@@ -16,58 +14,14 @@ public class Cadastro {
 
 	public static void main(String[] args) {
 		Cadastro c = new Cadastro();
-//		System.out.println(c.validaNome(""));
-		
-		sdf.setLenient(false);
-		try {
-			Date data2 = sdf.parse("34/06/1997");
-			System.out.println(data2);
-		} catch (ParseException e1) {
-			
-			e1.printStackTrace();
-		}
-//
-		try {
-			Date data1 = sdf.parse("25/12/1997");
-//			String stringDate = sdf.format(data1);
-//			System.out.println(stringDate);
-//			Date data2 = sdf.parse("18/02/2004");
-//			System.out.println(data1.before(data2));
-//			System.out.println(c.validaDataNascimento(data1));
-			// System.out.println(c.validaIdade(data1, 23));
-			// System.out.println(c.getIdade(data1));
-
-			// System.out.println(c.validaIdade(data1, 23));
-
-//			System.out.println(c.validaTextoEndereço("Rua Capitao Silvino Araujo"));
-//			System.out.println(c.validaNumeroRua(""));
-//			System.out.println(
-//					c.validaEndereco("Rua capitao silvino araujo", "Joaquim Romao", "Proximo a pax regional", "39"));
-
-			// System.out.println(c.validaNome(" Victor"));
-			
-//			String numero = "3545";
-//			
-//			System.out.println(numero.length());
-//			
-//			int index = numero.length();
-//			System.out.println(numero.substring(0, 1));
-			
-//			Calendar cal = Calendar.getInstance();
-//			cal.setTime(data1);
-//			
-//			System.out.println(cal.get(Calendar.DAY_OF_MONTH));
-//			System.out.println(cal.get(Calendar.MONTH));
-//			System.out.println(cal.get(Calendar.YEAR));
-			
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+	
 	}
 
 	public boolean validaNome(String nome) {
 		String validoNumero = "\\d";
 		String validoLetra = "\\w";
+		String validoEspaco = "\\s";
+		int caractereNEspaco = 0;
 
 		if (nome == "") {
 			return false;
@@ -76,12 +30,28 @@ public class Cadastro {
 
 			if (primeiroChar == ' ') {
 				return false;
-			} else if (nome.matches(validoLetra) && !nome.matches(validoNumero)) {
-				return true;
-			}
+			} else {
+				
+				for(int i = 0; i < nome.length(); i++) {
+					if((!nome.substring(i, i + 1).matches(validoLetra) || nome.substring(i, i + 1).matches(validoNumero)) &&
+							!nome.substring(i, i + 1).matches(validoEspaco)) {
+						return false;
+					}
+					
+					if(!nome.substring(i, i + 1).matches(validoEspaco)) {
+						caractereNEspaco++;
+					}
+				}
+				
+			} 
+//			if (nome.matches(validoLetra) && !nome.matches(validoNumero)) {
+//				return true;
+//			}
 		}
+		
+		if(caractereNEspaco == 0) return false;
 
-		return false;
+		return true;
 	}
 
 	public boolean validaCpf(String cpf) {
@@ -111,10 +81,15 @@ public class Cadastro {
 	}
 
 	public boolean validaMatricula(String matricula) {
+		
+		if(matricula == "") return false;
+		
 		String mask = "\\d\\d\\d\\d\\d\\d\\d\\d\\d";
 
 		// Verifica se a matricula foi digitada corretamente
-		boolean retorno = matricula.matches(mask);
+		
+		if(!matricula.matches(mask)) return false;
+		
 
 		Date atual = new Date();// Data do momento da execução
 		Calendar cal = Calendar.getInstance();
@@ -124,11 +99,15 @@ public class Cadastro {
 		int anoMatricula = Integer.parseInt(matricula.substring(0, 4));
 		int anoVerificado = cal.get(Calendar.YEAR);
 
-		if (anoMatricula > anoVerificado) {
+		if (anoMatricula > anoVerificado - 1) {
 			return false;
 		}
+		
+		int semestreMatricula = Integer.parseInt(matricula.substring(4, 5));
+		
+		if(semestreMatricula < 1 || semestreMatricula > 2) return false;
 
-		return retorno;
+		return true;
 	}
 
 	public boolean validaSexo(String sexo) {
@@ -202,7 +181,7 @@ public class Cadastro {
 	public boolean validaIdade(Date data, String idade) {
 		Cadastro d = new Cadastro();
 
-		if (d.getIdade(data) != idade)
+		if (!d.getIdade(data).equals(idade))
 			return false;
 
 		return true;
@@ -297,7 +276,7 @@ public class Cadastro {
 	}
 
 	public boolean validaReservista(String numero) {
-		String mask = "\\d\\d\\d\\d\\d\\d";
+		String mask = "\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d";
 
 		if (numero.matches(mask))
 			return true;
