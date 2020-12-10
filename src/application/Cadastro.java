@@ -1,5 +1,8 @@
 package application;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.InputMismatchException;
 
@@ -9,15 +12,28 @@ public class Cadastro {
 	int idade;
 	String telefone, matricula, sexo, reservista = null;
 
+	static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
 	public static void main(String[] args) {
 		Cadastro c = new Cadastro();
-		System.out.println(c.validaNome(""));
-
-		c.cpf = "111.111.111-11";
-		c.rg = "11.111.111-11";
-
-		System.out.println(c.validaCpf(c.cpf));
-		System.out.println(c.validaRG(c.rg));
+//		System.out.println(c.validaNome(""));
+//
+		try {
+			Date data1 = sdf.parse("25/12/1997");
+//			String stringDate = sdf.format(data1);
+//			System.out.println(stringDate);
+//			Date data2 = sdf.parse("18/02/2004");
+//			System.out.println(data1.before(data2));
+//			System.out.println(c.validaDataNascimento(data1));
+			//System.out.println(c.validaIdade(data1, 23));
+			//System.out.println(c.getIdade(data1));
+			
+			System.out.println(c.validaIdade(data1, 23));
+			
+			//System.out.println(c.validaNome(" Victor"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean validaNome(String nome) {
@@ -26,7 +42,7 @@ public class Cadastro {
 			return false;
 		} else {
 			char primeiroChar = nome.charAt(0);
-			
+
 			if (primeiroChar == ' ') {
 				return false;
 			} else {
@@ -66,7 +82,20 @@ public class Cadastro {
 	public boolean validaMatricula(String matricula) {
 		String mask = "\\d\\d\\d\\d\\d\\d\\d\\d\\d";
 
+		// Verifica se a matricula foi digitada corretamente
 		boolean retorno = matricula.matches(mask);
+
+		Date atual = new Date();// Data do momento da execução
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(atual);
+
+		// Verifica se o ano da matricula é posterior ao ano do momento da verificação
+		int anoMatricula = Integer.parseInt(matricula.substring(0, 4));
+		int anoVerificado = cal.get(Calendar.YEAR);
+
+		if (anoMatricula > anoVerificado) {
+			return false;
+		}
 
 		return retorno;
 	}
@@ -77,5 +106,43 @@ public class Cadastro {
 		} else
 			return false;
 	}
+
+	public boolean validaDataNascimento(Date data) {
+		String mask = "\\d\\d/\\d\\d/\\d\\d\\d\\d";
+
+		String stringDate = sdf.format(data);//Converte date para string
+		if (stringDate.matches(mask) == false)
+			return false;
+
+		Date atual = new Date();// Data do momento da execução
+
+		if (atual.before(data)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public int getIdade(Date data) {
+		Calendar cData = Calendar.getInstance();
+		Calendar cHoje= Calendar.getInstance();
+		cData.setTime(data);
+		cData.set(Calendar.YEAR, cHoje.get(Calendar.YEAR));//Seta o ano da data atual na data de nascimento
+		int idade = cData.after(cHoje) ? -1 : 0;//Verifica se o dia e o mês da data de nascimento já passaram na data atual. Se não passou diminui 1 da idade
+		cData.setTime(data);//seta novamente o ano da data de nascimento
+		idade += cHoje.get(Calendar.YEAR) - cData.get(Calendar.YEAR);
+		return idade;
+	}
+	
+	public boolean validaIdade(Date data, int idade) {
+		Cadastro d = new Cadastro();
+
+		if (d.validaDataNascimento(data) == false) return false;
+
+		if(d.getIdade(data) != idade) return false;
+		
+		return true;
+	}
+	
 
 }
