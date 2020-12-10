@@ -17,6 +17,15 @@ public class Cadastro {
 	public static void main(String[] args) {
 		Cadastro c = new Cadastro();
 //		System.out.println(c.validaNome(""));
+		
+		sdf.setLenient(false);
+		try {
+			Date data2 = sdf.parse("34/06/1997");
+			System.out.println(data2);
+		} catch (ParseException e1) {
+			
+			e1.printStackTrace();
+		}
 //
 		try {
 			Date data1 = sdf.parse("25/12/1997");
@@ -25,22 +34,40 @@ public class Cadastro {
 //			Date data2 = sdf.parse("18/02/2004");
 //			System.out.println(data1.before(data2));
 //			System.out.println(c.validaDataNascimento(data1));
-			//System.out.println(c.validaIdade(data1, 23));
-			//System.out.println(c.getIdade(data1));
+			// System.out.println(c.validaIdade(data1, 23));
+			// System.out.println(c.getIdade(data1));
+
+			// System.out.println(c.validaIdade(data1, 23));
+
+//			System.out.println(c.validaTextoEndereço("Rua Capitao Silvino Araujo"));
+//			System.out.println(c.validaNumeroRua(""));
+//			System.out.println(
+//					c.validaEndereco("Rua capitao silvino araujo", "Joaquim Romao", "Proximo a pax regional", "39"));
+
+			// System.out.println(c.validaNome(" Victor"));
 			
-			//System.out.println(c.validaIdade(data1, 23));
+//			String numero = "3545";
+//			
+//			System.out.println(numero.length());
+//			
+//			int index = numero.length();
+//			System.out.println(numero.substring(0, 1));
 			
-			System.out.println(c.validaTextoEndereço("Rua Capitao Silvino Araujo"));
-			System.out.println(c.validaNumeroRua("39"));
-			System.out.println(c.validaEndereco("Rua capitao silvino araujo", "Joaquim Romao", "Proximo a pax regional", "39"));
+//			Calendar cal = Calendar.getInstance();
+//			cal.setTime(data1);
+//			
+//			System.out.println(cal.get(Calendar.DAY_OF_MONTH));
+//			System.out.println(cal.get(Calendar.MONTH));
+//			System.out.println(cal.get(Calendar.YEAR));
 			
-			//System.out.println(c.validaNome(" Victor"));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public boolean validaNome(String nome) {
+		String validoNumero = "\\d";
+		String validoLetra = "\\w";
 
 		if (nome == "") {
 			return false;
@@ -49,14 +76,12 @@ public class Cadastro {
 
 			if (primeiroChar == ' ') {
 				return false;
-			} else {
-				try {
-					return true;
-				} catch (InputMismatchException e) {
-					return false;
-				}
+			} else if (nome.matches(validoLetra) && !nome.matches(validoNumero)) {
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	public boolean validaCpf(String cpf) {
@@ -76,11 +101,12 @@ public class Cadastro {
 	}
 
 	public boolean validaTelefone(String telefone) {
-		String mask1 = "(\\d\\d) 9\\d\\d\\d\\d-\\d\\d\\d\\d";
-		String mask2 = "(\\d\\d) \\d\\d\\d\\d-\\d\\d\\d\\d";
+		String mask1 = "^\\([1-9]{2}\\) (?:[2-8]|9[1-9])[0-9]{3}\\-[0-9]{4}$";
+		//String mask2 = "(\\d\\d) \\d\\d\\d\\d-\\d\\d\\d\\d";
 
-		if(telefone.matches(mask1) || telefone.matches(mask2)) return true;
-		
+		if (telefone.matches(mask1)/* || telefone.matches(mask2)*/)
+			return true;
+
 		return false;
 	}
 
@@ -105,20 +131,52 @@ public class Cadastro {
 		return retorno;
 	}
 
-	public boolean validaSexo(char sexo) {
-		if (sexo == 'm' || sexo == 'M' || sexo == 'f' || sexo == 'F') {
+	public boolean validaSexo(String sexo) {
+		if (sexo == "m" || sexo == "M" || sexo == "f" || sexo == "F") {
 			return true;
 		} else
 			return false;
 	}
 
 	public boolean validaDataNascimento(Date data) {
+		
+		sdf.setLenient(false);
+		
 		String mask = "\\d\\d/\\d\\d/\\d\\d\\d\\d";
 
-		String stringDate = sdf.format(data);//Converte date para string
+		String stringDate = sdf.format(data);// Converte date para string
 		if (stringDate.matches(mask) == false)
 			return false;
-
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(data);
+		
+		if(cal.get(Calendar.MONTH) + 1 < 1 || cal.get(Calendar.MONTH) + 1 > 12) {
+			return false;
+		} else {
+			
+			if(cal.get(Calendar.DAY_OF_MONTH) < 1) return false;
+			
+			int dias;
+			
+			if(cal.get(Calendar.MONTH) + 1 == 2){
+				if(cal.get(Calendar.YEAR) % 4 == 0) {
+					dias = 29;
+				} else dias = 28;
+				
+			} else if(cal.get(Calendar.MONTH) + 1 == 4 ||
+					cal.get(Calendar.MONTH) + 1 == 6 ||
+					cal.get(Calendar.MONTH) + 1 == 9 ||
+					cal.get(Calendar.MONTH) + 1 == 11) {
+				
+				dias = 30;
+				
+			} else 
+				dias = 31;
+			
+			if(cal.get(Calendar.DAY_OF_MONTH) > dias) return false;
+		}
+		
 		Date atual = new Date();// Data do momento da execução
 
 		if (atual.before(data)) {
@@ -128,73 +186,123 @@ public class Cadastro {
 		return true;
 	}
 
-	public int getIdade(Date data) {
+	public String getIdade(Date data) {
 		Calendar cData = Calendar.getInstance();
-		Calendar cHoje= Calendar.getInstance();
+		Calendar cHoje = Calendar.getInstance();
 		cData.setTime(data);
-		cData.set(Calendar.YEAR, cHoje.get(Calendar.YEAR));//Seta o ano da data atual na data de nascimento
-		int idade = cData.after(cHoje) ? -1 : 0;//Verifica se o dia e o mês da data de nascimento já passaram na data atual. Se não passou diminui 1 da idade
-		cData.setTime(data);//seta novamente o ano da data de nascimento
+		cData.set(Calendar.YEAR, cHoje.get(Calendar.YEAR));// Seta o ano da data atual na data de nascimento
+		int idade = cData.after(cHoje) ? -1 : 0;// Verifica se o dia e o mês da data de nascimento já passaram na data
+												// atual. Se não passou diminui 1 da idade
+		cData.setTime(data);// seta novamente o ano da data de nascimento
 		idade += cHoje.get(Calendar.YEAR) - cData.get(Calendar.YEAR);
-		return idade;
+		String sIdade = Integer.toString(idade);
+		return sIdade;
 	}
-	
-	public boolean validaIdade(Date data, int idade) {
+
+	public boolean validaIdade(Date data, String idade) {
 		Cadastro d = new Cadastro();
 
-		if (d.validaDataNascimento(data) == false) return false;
+		if (d.getIdade(data) != idade)
+			return false;
 
-		if(d.getIdade(data) != idade) return false;
-		
 		return true;
 	}
-	
+
 	public boolean validaTextoEndereço(String texto) {
+		if (texto == "")
+			return false;
+
 		String mask1 = "\\w";
 		String mask2 = "\\s";
 		String caractereVerificado;
-		
-		for(int i = 0; i < texto.length(); i++) {
+		int caracteresNEspacos = 0;
+
+		for (int i = 0; i < texto.length(); i++) {
 			caractereVerificado = texto.substring(i, i + 1);
-			
-			if(!caractereVerificado.matches(mask1) &&
-					!caractereVerificado.matches(mask2)) {
+
+			if (!caractereVerificado.matches(mask1) && !caractereVerificado.matches(mask2)) {
 				return false;
 			}
+
+			if (caractereVerificado.matches(mask1))
+				caracteresNEspacos++;
 		}
-		
+
+		if (caracteresNEspacos == 0)
+			return false;
+
 		return true;
 	}
-	
-	public boolean validaNumeroRua(String numero) {
-		String mask = "\\W";
+
+	public boolean validaComplemento(String texto) {
+		if (texto == "")
+			return true;
+
+		String mask1 = "\\w";
+		String mask2 = "\\s";
 		String caractereVerificado;
-		for(int i = 0; i < numero.length(); i++) {
-			caractereVerificado = numero.substring(i, i + 1);
-			if(caractereVerificado.matches(mask)) return false;
+		int caracteresNEspacos = 0;
+
+		for (int i = 0; i < texto.length(); i++) {
+			caractereVerificado = texto.substring(i, i + 1);
+
+			if (!caractereVerificado.matches(mask1) && !caractereVerificado.matches(mask2)) {
+				return false;
+			}
+
+			if (caractereVerificado.matches(mask1))
+				caracteresNEspacos++;
 		}
-		
+
+		if (caracteresNEspacos == 0)
+			return false;
+
 		return true;
 	}
-	
+
+	public boolean validaNumeroRua(String numero) {
+
+		if (numero == "")
+			return false;
+
+		String mask = "\\D";
+		String caractereVerificado;
+
+		if (numero.length() > 1) {
+			for (int i = 0; i < numero.length() - 1; i++) {
+				caractereVerificado = numero.substring(i, i + 1);
+				if (caractereVerificado.matches(mask))
+					return false;
+			}
+			
+			String index = numero.substring(numero.length() - 1, numero.length());
+			String mask2 = "\\w";
+			
+			if(!index.matches(mask2)) return false;
+			
+		} else {
+			if(numero.matches(mask)) return false;
+		}
+
+		return true;
+	}
+
 	public boolean validaEndereco(String rua, String bairro, String complemento, String numero) {
-		if(validaTextoEndereço(rua) && 
-				validaTextoEndereço(bairro) && 
-				validaTextoEndereço(complemento) 
+		if (validaTextoEndereço(rua) && validaTextoEndereço(bairro) && validaComplemento(complemento)
 				&& validaNumeroRua(numero)) {
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	public boolean validaReservista(String numero) {
 		String mask = "\\d\\d\\d\\d\\d\\d";
-		
-		if(numero.matches(mask)) return true;
-		
+
+		if (numero.matches(mask))
+			return true;
+
 		return false;
 	}
-	
 
 }
