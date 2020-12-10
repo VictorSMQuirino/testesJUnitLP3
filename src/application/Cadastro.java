@@ -28,7 +28,11 @@ public class Cadastro {
 			//System.out.println(c.validaIdade(data1, 23));
 			//System.out.println(c.getIdade(data1));
 			
-			System.out.println(c.validaIdade(data1, 23));
+			//System.out.println(c.validaIdade(data1, 23));
+			
+			System.out.println(c.validaTextoEndereço("Rua Capitao Silvino Araujo"));
+			System.out.println(c.validaNumeroRua("39"));
+			System.out.println(c.validaEndereco("Rua capitao silvino araujo", "Joaquim Romao", "Proximo a pax regional", "39"));
 			
 			//System.out.println(c.validaNome(" Victor"));
 		} catch (ParseException e) {
@@ -72,11 +76,12 @@ public class Cadastro {
 	}
 
 	public boolean validaTelefone(String telefone) {
-		String mask = "(\\d\\d) 9\\d\\d\\d\\d-\\d\\d\\d\\d";
+		String mask1 = "(\\d\\d) 9\\d\\d\\d\\d-\\d\\d\\d\\d";
+		String mask2 = "(\\d\\d) \\d\\d\\d\\d-\\d\\d\\d\\d";
 
-		boolean retorno = telefone.matches(mask);
-
-		return retorno;
+		if(telefone.matches(mask1) || telefone.matches(mask2)) return true;
+		
+		return false;
 	}
 
 	public boolean validaMatricula(String matricula) {
@@ -142,6 +147,53 @@ public class Cadastro {
 		if(d.getIdade(data) != idade) return false;
 		
 		return true;
+	}
+	
+	public boolean validaTextoEndereço(String texto) {
+		String mask1 = "\\w";
+		String mask2 = "\\s";
+		String caractereVerificado;
+		
+		for(int i = 0; i < texto.length(); i++) {
+			caractereVerificado = texto.substring(i, i + 1);
+			
+			if(!caractereVerificado.matches(mask1) &&
+					!caractereVerificado.matches(mask2)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public boolean validaNumeroRua(String numero) {
+		String mask = "\\W";
+		String caractereVerificado;
+		for(int i = 0; i < numero.length(); i++) {
+			caractereVerificado = numero.substring(i, i + 1);
+			if(caractereVerificado.matches(mask)) return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean validaEndereco(String rua, String bairro, String complemento, String numero) {
+		if(validaTextoEndereço(rua) && 
+				validaTextoEndereço(bairro) && 
+				validaTextoEndereço(complemento) 
+				&& validaNumeroRua(numero)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean validaReservista(String numero) {
+		String mask = "\\d\\d\\d\\d\\d\\d";
+		
+		if(numero.matches(mask)) return true;
+		
+		return false;
 	}
 	
 
